@@ -470,7 +470,7 @@ function injectWebChat() {
       <svg id="ia-float-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </button>
     <!-- CHAT PANEL -->
-    <div id="web-chat-panel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:300;width:420px;max-height:600px;background:var(--white);box-shadow:var(--shadow-lg);border:1.5px solid var(--border);display:none;flex-direction:column;animation:fadeInUp .3s ease">
+    <div id="web-chat-panel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:300;width:480px;max-height:680px;background:var(--white);box-shadow:var(--shadow-lg);border:1.5px solid var(--border);display:none;flex-direction:column;animation:fadeInUp .3s ease">
       <div style="background:var(--blue);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
         <div style="display:flex;align-items:center;gap:12px">
           <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
@@ -483,7 +483,7 @@ function injectWebChat() {
         </div>
         <button onclick="toggleWebChat()" style="width:28px;height:28px;background:rgba(255,255,255,.15);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:50%">✕</button>
       </div>
-      <div id="web-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--off-white);min-height:200px;max-height:340px">
+      <div id="web-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--off-white);min-height:280px;max-height:460px">
         <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">
           <div style="max-width:85%;padding:10px 14px;background:var(--white);border:1.5px solid var(--border);font-size:13px;line-height:1.5;color:var(--text-1)">
             ¡Hola! Soy el asistente de Muñoz Marchesi. ¿En qué puedo ayudarte hoy?

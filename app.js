@@ -447,4 +447,168 @@ async function initShared(){
   injectSharedHTML();
   loadCart();
   await Promise.all([loadCategorias(), loadProductos(), loadPlanes()]);
+  if(typeof injectWebChat === "function") injectWebChat();
+}
+
+// ══════════════════════════════════════
+// CHAT IA — WEB
+// ══════════════════════════════════════
+let webChatHistory = [];
+let webChatOpen = false;
+
+function injectWebChat() {
+  document.body.insertAdjacentHTML('beforeend', `
+    <!-- IA BUBBLE -->
+    <div id="ia-bubble-web" style="position:fixed;bottom:100px;right:24px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:8px;animation:fadeInUp .4s ease">
+      <div style="background:var(--blue);color:#fff;font-size:13px;font-weight:600;padding:10px 16px;box-shadow:var(--shadow-md);max-width:200px;text-align:center;line-height:1.4">
+        ¿Necesitás ayuda?
+        <div style="position:absolute;bottom:-8px;right:20px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid var(--blue)"></div>
+      </div>
+    </div>
+    <!-- IA FLOAT BUTTON -->
+    <button id="ia-float-btn" onclick="toggleWebChat()" style="position:fixed;bottom:24px;right:24px;z-index:301;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:background .15s,transform .15s;border:none;cursor:pointer">
+      <svg id="ia-float-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <!-- CHAT PANEL -->
+    <div id="web-chat-panel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:300;width:360px;max-height:520px;background:var(--white);box-shadow:var(--shadow-lg);border:1.5px solid var(--border);display:none;flex-direction:column;animation:fadeInUp .3s ease">
+      <div style="background:var(--blue);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:700">Asistente MM</div>
+            <div style="font-size:11px;opacity:.75">Powered by IA</div>
+          </div>
+        </div>
+        <button onclick="toggleWebChat()" style="width:28px;height:28px;background:rgba(255,255,255,.15);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:50%">✕</button>
+      </div>
+      <div id="web-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--off-white);min-height:200px;max-height:340px">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">
+          <div style="max-width:85%;padding:10px 14px;background:var(--white);border:1.5px solid var(--border);font-size:13px;line-height:1.5;color:var(--text-1)">
+            ¡Hola! Soy el asistente de Muñoz Marchesi. ¿En qué puedo ayudarte hoy?
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding:12px 16px;background:var(--white);border-top:1.5px solid var(--border);flex-shrink:0">
+        <input id="web-chat-input" placeholder="Escribí tu consulta…" onkeydown="if(event.key==='Enter')sendWebChat()" style="flex:1;height:38px;padding:0 12px;border:1.5px solid var(--border);background:var(--off-white);font-size:13px;outline:none;font-family:inherit"/>
+        <button onclick="sendWebChat()" style="width:38px;height:38px;background:var(--blue);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+    <style>
+    @keyframes typingDot{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    #ia-float-btn:hover{background:var(--blue-dark);transform:scale(1.05)}
+    #web-chat-input:focus{border-color:var(--blue)}
+    </style>
+  `);
+
+  // Hide bubble after 5s
+  setTimeout(() => {
+    const b = document.getElementById('ia-bubble-web');
+    if(b) b.style.display = 'none';
+  }, 5000);
+}
+
+function toggleWebChat() {
+  webChatOpen = !webChatOpen;
+  const panel = document.getElementById('web-chat-panel');
+  const bubble = document.getElementById('ia-bubble-web');
+  if(webChatOpen) {
+    panel.style.display = 'flex';
+    if(bubble) bubble.style.display = 'none';
+    setTimeout(()=>document.getElementById('web-chat-input')?.focus(), 100);
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+async function sendWebChat() {
+  const input = document.getElementById('web-chat-input');
+  const msg = input?.value.trim();
+  if(!msg) return;
+  input.value = '';
+
+  appendWebMsg(msg, 'user');
+  webChatHistory.push({ role:'user', content: msg });
+
+  const typingEl = appendWebTyping();
+
+  try {
+    const productos = allProducts.map(p => ({
+      codigo: p.codigo, nombre: p.nombre,
+      precio: Math.round(p.precio * 1.05),
+      categoria: p.categoria, descripcion: p.descripcion,
+    }));
+
+    const res = await fetch(SERVIDOR_URL + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: webChatHistory, productos }),
+    });
+    const data = await res.json();
+    typingEl?.remove();
+
+    if(data.ok) {
+      const cleanText = data.text.replace(/\[COD:[^\]]+\]/g, '').trim();
+      appendWebMsg(cleanText, 'ai');
+      webChatHistory.push({ role:'assistant', content: data.text });
+      if(data.productosRecomendados?.length) {
+        data.productosRecomendados.forEach(p => appendWebProduct(p));
+      }
+    } else {
+      appendWebMsg('Hubo un error. Intentá de nuevo.', 'ai');
+    }
+  } catch(e) {
+    typingEl?.remove();
+    appendWebMsg('No pude conectarme. Verificá tu conexión.', 'ai');
+  }
+}
+
+function appendWebMsg(text, role) {
+  const container = document.getElementById('web-chat-messages');
+  if(!container) return;
+  const isUser = role === 'user';
+  const div = document.createElement('div');
+  div.style.cssText = `display:flex;flex-direction:column;align-items:${isUser?'flex-end':'flex-start'};gap:4px`;
+  div.innerHTML = `<div style="max-width:85%;padding:10px 14px;background:${isUser?'var(--blue)':'var(--white)'};color:${isUser?'#fff':'var(--text-1)'};${isUser?'':'border:1.5px solid var(--border);'}font-size:13px;line-height:1.5">${esc(text)}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendWebTyping() {
+  const container = document.getElementById('web-chat-messages');
+  if(!container) return null;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:flex-start';
+  div.innerHTML = `<div style="padding:10px 14px;background:var(--white);border:1.5px solid var(--border);display:flex;gap:4px;align-items:center">
+    <span style="width:6px;height:6px;border-radius:50%;background:var(--text-3);animation:typingDot 1.2s ease infinite;display:block"></span>
+    <span style="width:6px;height:6px;border-radius:50%;background:var(--text-3);animation:typingDot 1.2s ease .2s infinite;display:block"></span>
+    <span style="width:6px;height:6px;border-radius:50%;background:var(--text-3);animation:typingDot 1.2s ease .4s infinite;display:block"></span>
+  </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function appendWebProduct(p) {
+  const container = document.getElementById('web-chat-messages');
+  if(!container) return;
+  const price = Math.round((p.precio || 0));
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:flex-start';
+  div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="width:48px;height:48px;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;overflow:hidden">
+      ${p.imagen_url?`<img src="${esc(p.imagen_url)}" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'"/>`:'<span style="font-size:20px">📦</span>'}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:600;color:var(--text-1);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(p.nombre)}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--blue);margin-top:2px">$${price.toLocaleString('es-AR')}</div>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text-3)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
 }

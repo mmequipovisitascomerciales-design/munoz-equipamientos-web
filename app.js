@@ -470,7 +470,7 @@ function injectWebChat() {
       <svg id="ia-float-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </button>
     <!-- CHAT PANEL -->
-    <div id="web-chat-panel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:300;width:360px;max-height:520px;background:var(--white);box-shadow:var(--shadow-lg);border:1.5px solid var(--border);display:none;flex-direction:column;animation:fadeInUp .3s ease">
+    <div id="web-chat-panel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:300;width:420px;max-height:600px;background:var(--white);box-shadow:var(--shadow-lg);border:1.5px solid var(--border);display:none;flex-direction:column;animation:fadeInUp .3s ease">
       <div style="background:var(--blue);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
         <div style="display:flex;align-items:center;gap:12px">
           <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
@@ -540,7 +540,7 @@ async function sendWebChat() {
     const productos = allProducts.map(p => ({
       codigo: p.codigo, nombre: p.nombre,
       precio: Math.round(p.precio * 1.05),
-      categoria: p.categoria, descripcion: p.descripcion,
+      categoria: p.categoria,
     }));
 
     const res = await fetch(SERVIDOR_URL + '/chat', {
@@ -567,13 +567,19 @@ async function sendWebChat() {
   }
 }
 
+function renderChatText(text) {
+  // Support **bold** and newlines
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
 function appendWebMsg(text, role) {
   const container = document.getElementById('web-chat-messages');
   if(!container) return;
   const isUser = role === 'user';
   const div = document.createElement('div');
   div.style.cssText = `display:flex;flex-direction:column;align-items:${isUser?'flex-end':'flex-start'};gap:4px`;
-  div.innerHTML = `<div style="max-width:85%;padding:10px 14px;background:${isUser?'var(--blue)':'var(--white)'};color:${isUser?'#fff':'var(--text-1)'};${isUser?'':'border:1.5px solid var(--border);'}font-size:13px;line-height:1.5">${esc(text)}</div>`;
+  div.innerHTML = `<div style="max-width:85%;padding:10px 14px;background:${isUser?'var(--blue)':'var(--white)'};color:${isUser?'#fff':'var(--text-1)'};${isUser?'':'border:1.5px solid var(--border);'}font-size:13px;line-height:1.5;white-space:pre-line">${renderChatText(text)}</div>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }

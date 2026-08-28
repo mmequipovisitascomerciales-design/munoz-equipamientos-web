@@ -511,12 +511,15 @@ function injectWebChat() {
     }
     @media(max-width:520px){
       .web-chat-panel{
-        width:calc(100vw - 24px);height:70vh;
-        right:12px;bottom:80px;
-        left:12px;
+        position:fixed;
+        left:0;right:0;bottom:80px;
+        width:100%;
+        height:70vh;
+        border-left:none;border-right:none;
+        border-radius:0;
       }
-      #ia-float-btn{right:12px;bottom:12px}
-      #ia-bubble-web{right:12px;bottom:76px}
+      #ia-float-btn{right:16px;bottom:16px}
+      #ia-bubble-web{right:16px;bottom:82px}
     }
     </style>
   `);

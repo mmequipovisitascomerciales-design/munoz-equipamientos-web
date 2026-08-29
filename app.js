@@ -102,6 +102,9 @@ function setupHeroSlideshow(images){
   heroSlides = images;
   media.innerHTML = `<div class="hero-slides">${images.map((img,i)=>`<div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')"></div>`).join('')}</div>`;
   if(indicators) indicators.innerHTML = images.map((_,i)=>`<div class="hero-dot ${i===0?'active':''}" onclick="goHeroSlide(${i})"></div>`).join('');
+  // Hide hero text content when showing images slideshow
+  const content = document.getElementById('hero-content');
+  if(content) content.style.display = 'none';
   clearInterval(heroInterval);
   heroInterval = setInterval(()=>{ heroIndex=(heroIndex+1)%images.length; updateHeroSlide(); }, 4000);
 }
@@ -504,7 +507,8 @@ function injectWebChat() {
     #web-chat-input:focus{border-color:var(--blue)}
     .web-chat-panel{
       position:fixed;bottom:92px;right:24px;z-index:300;
-      width:480px;height:740px;
+      width:480px;
+      height:min(740px, calc(100vh - 72px - 108px));
       background:var(--white);box-shadow:var(--shadow-lg);
       border:1.5px solid var(--border);
       animation:fadeInUp .3s ease;

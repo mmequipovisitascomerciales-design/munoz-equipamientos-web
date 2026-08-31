@@ -634,7 +634,7 @@ function appendWebProduct(p) {
     </div>
     <div style="flex:1;min-width:0">
       <div style="font-size:12px;font-weight:600;color:var(--text-1);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(p.nombre)}</div>
-      <div style="font-size:14px;font-weight:800;color:var(--blue);margin-top:2px">$${price.toLocaleString('es-AR')}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--blue);margin-top:2px">$${price.toLocaleString('es-AR').replace(/,/g,'.')}</div>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text-3)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
   </div>`;

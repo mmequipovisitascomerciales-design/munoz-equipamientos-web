@@ -394,7 +394,7 @@ async function enviarPresupuesto(){
   const obs=document.getElementById('c-obs')?.value.trim()||'';
   const sub=calcTotal(); const total=calcConInteres(sub,planSeleccionado); const cuota=cuotaValor(total,planSeleccionado);
   const planTxt=planSeleccionado?(planSeleccionado.cuotas===1?'Contado':`${planSeleccionado.cuotas} cuotas de ${fmtPrice(cuota)} (Total: ${fmtPrice(total)})`):'Contado';
-  const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:fmtPrice(Math.round(i.precio||0)),qty:i.qty}))};
+  const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:Math.round(i.precio||0),qty:i.qty}))};
   const btn=document.getElementById('btn-enviar');
   if(btn){btn.disabled=true;btn.textContent='Enviando…';}
   try{ await fetch(SERVIDOR_URL+'/presupuesto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); }catch(e){ console.log(e); }

@@ -625,6 +625,7 @@ function appendWebTyping() {
 function appendWebProduct(p) {
   const container = document.getElementById('web-chat-messages');
   if(!container) return;
+  console.log('Buscando codigo:', p.codigo, 'en allProducts:', allProducts.slice(0,3).map(x=>x.codigo));
   const prod = allProducts.find(x => String(x.codigo) === String(p.codigo));
   const price = prod ? roundClean(prod.precio * PRICE_MARKUP) : Math.round(p.precio || 0);
   div.style.cssText = 'display:flex;align-items:flex-start';

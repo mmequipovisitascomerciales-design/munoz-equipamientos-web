@@ -397,6 +397,7 @@ async function enviarPresupuesto(){
   const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:Math.round(i.precio||0),qty:i.qty}))};
   const btn=document.getElementById('btn-enviar');
   if(btn){btn.disabled=true;btn.textContent='Enviando…';}
+  console.log('Payload:', JSON.stringify(payload));
   try{ await fetch(SERVIDOR_URL+'/presupuesto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); }catch(e){ console.log(e); }
   checkoutStep=4; renderCheckout();
 }

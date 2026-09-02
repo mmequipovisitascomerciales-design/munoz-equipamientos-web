@@ -624,17 +624,19 @@ function appendWebTyping() {
 function appendWebProduct(p) {
   const container = document.getElementById('web-chat-messages');
   if(!container) return;
-  console.log('Buscando codigo:', p.codigo, 'en allProducts:', allProducts.slice(0,3).map(x=>x.codigo));
-  const prod = allProducts.find(x => x.codigo.replace(/\.0$/,'') === String(p.codigo).replace(/\.0$/,''));
-  const price = prod ? Math.round(prod.precio||0) : Math.round(p.precio || 0);
+  const codigoNorm = formatCodigo(String(p.codigo));
+  const prod = allProducts.find(x => formatCodigo(x.codigo) === codigoNorm);
+  const priceNum = prod ? Math.round(prod.precio||0) : Math.round(p.precio||0);
+  const codigoModal = prod ? prod.codigo : p.codigo;
+  const div = document.createElement('div');
   div.style.cssText = 'display:flex;align-items:flex-start';
-  div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo).replace(/\.0$/,''))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+  div.innerHTML = `<div onclick="openProdModal('${esc(String(codigoModal))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
     <div style="width:48px;height:48px;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;overflow:hidden">
       ${p.imagen_url?`<img src="${esc(p.imagen_url)}" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'"/>`:'<span style="font-size:20px">📦</span>'}
     </div>
     <div style="flex:1;min-width:0">
       <div style="font-size:12px;font-weight:600;color:var(--text-1);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(p.nombre)}</div>
-      <div style="font-size:14px;font-weight:800;color:var(--blue);margin-top:2px">$${price.toLocaleString('es-AR').replace(/,/g,'.')}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--blue);margin-top:2px">$${priceNum.toLocaleString('es-AR').replace(/,/g,'.')}</div>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text-3)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
   </div>`;

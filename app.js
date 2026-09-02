@@ -2,7 +2,6 @@
 const SB_URL       = "https://ncagcvtkporoapumenoo.supabase.co";
 const SB_KEY       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYWdjdnRrcG9yb2FwdW1lbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwODI4NDQsImV4cCI6MjA5OTY1ODg0NH0.7LyvoGFFI4KWRDq5JgNFOpkGjtlplTDRX_kCHjoXXNc";
 const SERVIDOR_URL = "https://munoz-app-server.onrender.com";
-const PRICE_MARKUP = 1.05;
 const PROD_PER_PAGE = 20;
 
 // ── UTILS ──────────────────────────────────────────────────
@@ -16,7 +15,7 @@ function roundClean(n){
   if(n<1000000) return Math.round(n/1000)*1000;
   return Math.round(n/10000)*10000;
 }
-function applyMarkup(p){ const v=parsePrice(p); return v?roundClean(v*PRICE_MARKUP):0; }
+function applyMarkup(p){ const v=parsePrice(p); return Math.round(v||0); }
 function fmtPrice(n){ return '$'+Math.round(n).toLocaleString('es-AR').replace(/,/g,'.'); }
 function formatCodigo(c){ const n=String(c).split('.')[0].replace(/[^0-9]/g,''); return n.length===4?'0'+n:n; }
 function getCatIcon(cat){
@@ -202,7 +201,7 @@ function renderProducts(){
     document.getElementById('pagination-wrap').style.display='none'; return;
   }
   grid.innerHTML = page.map((p,i)=>{
-    const price  = applyMarkup(p.precio);
+    const price  = Math.round(p.precio||0);
     const inCart = cart.find(c=>c.codigo===p.codigo);
     return `<div class="prod-card fade-in" style="animation-delay:${Math.min(i,12)*.04}s" onclick="openProdModal('${esc(p.codigo)}')">
       <div class="prod-card-img">
@@ -244,7 +243,7 @@ function goPage(p){
 // ── PRODUCT MODAL ──────────────────────────────────────────
 function openProdModal(codigo){
   const p=allProducts.find(x=>x.codigo===codigo); if(!p) return;
-  const price=applyMarkup(p.precio); const inCart=cart.find(c=>c.codigo===p.codigo);
+  const price=Math.round(p.precio||0); const inCart=cart.find(c=>c.codigo===p.codigo);
   document.getElementById('modal-img').innerHTML=p.imagen?`<img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" style="width:100%;height:100%;object-fit:contain">`:`<span class="prod-modal-placeholder">${getCatIcon(p.categoria)}</span>`;
   document.getElementById('modal-info').innerHTML=`
     <button class="prod-modal-close" onclick="closeProdModal()">✕</button>
@@ -297,7 +296,7 @@ function renderCartItems(){
   if(!cart.length){el.innerHTML=`<div class="cart-empty"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><p>Tu carrito está vacío</p></div>`;if(tot)tot.textContent='$0';return;}
   let subtotal=0;
   el.innerHTML=cart.map(item=>{
-    const price=applyMarkup(item.precio); subtotal+=price*item.qty;
+    const price=Math.round(item.precio||0); subtotal+=price*item.qty;
     return `<div class="cart-item">
       <div class="cart-item-img">${item.imagen?`<img src="${esc(item.imagen)}" onerror="this.style.display='none'">`:''}<span style="font-size:24px">${getCatIcon(item.categoria)}</span></div>
       <div class="cart-item-info">
@@ -317,7 +316,7 @@ function openCart(){ renderCartItems(); document.getElementById('cart-overlay').
 function closeCart(){ document.getElementById('cart-overlay').classList.remove('open'); document.getElementById('cart-drawer').classList.remove('open'); document.body.style.overflow=''; }
 
 // ── CHECKOUT ───────────────────────────────────────────────
-function calcTotal(){ return cart.reduce((s,i)=>s+applyMarkup(i.precio)*i.qty,0); }
+function calcTotal(){ return cart.reduce((s,i)=>s+Math.round(i.precio||0)*i.qty,0); }
 function calcConInteres(sub,plan){ if(!plan||plan.interes===0) return sub; return roundClean(sub*(1+plan.interes/100)); }
 function cuotaValor(total,plan){ return plan&&plan.cuotas>1?roundClean(total/plan.cuotas):total; }
 
@@ -378,7 +377,7 @@ function renderResumenStep(modal){
   const obs=document.getElementById('c-obs')?.value.trim()||'';
   const sub=calcTotal(); const total=calcConInteres(sub,planSeleccionado); const cuota=cuotaValor(total,planSeleccionado);
   const planTxt=planSeleccionado?(planSeleccionado.cuotas===1?'Contado':`${planSeleccionado.cuotas} cuotas de ${fmtPrice(cuota)}`):'Contado';
-  const itemsHTML=cart.map(item=>`<div class="resumen-item"><div class="resumen-item-name">${esc(item.nombre)}</div><div class="resumen-item-qty">x${item.qty}</div><div class="resumen-item-price">${fmtPrice(applyMarkup(item.precio)*item.qty)}</div></div>`).join('');
+  const itemsHTML=cart.map(item=>`<div class="resumen-item"><div class="resumen-item-name">${esc(item.nombre)}</div><div class="resumen-item-qty">x${item.qty}</div><div class="resumen-item-price">${fmtPrice(Math.round(item.precio||0)*item.qty)}</div></div>`).join('');
   modal.innerHTML=`<div class="checkout-header"><div><div class="checkout-step-title">Confirmación</div><div class="checkout-step-sub">Paso 3 de 3</div></div><button onclick="closeCheckout()" style="width:36px;height:36px;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);border:none;cursor:pointer">✕</button></div>
     <div class="checkout-body"><div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div></div>
     <div class="resumen-cliente"><div class="resumen-cliente-name">${esc(nombre.trim())}</div><div class="resumen-cliente-tel">Tel: ${esc(tel)}</div>${obs?`<div class="resumen-cliente-tel" style="margin-top:4px">Obs: ${esc(obs)}</div>`:''}</div>
@@ -395,7 +394,7 @@ async function enviarPresupuesto(){
   const obs=document.getElementById('c-obs')?.value.trim()||'';
   const sub=calcTotal(); const total=calcConInteres(sub,planSeleccionado); const cuota=cuotaValor(total,planSeleccionado);
   const planTxt=planSeleccionado?(planSeleccionado.cuotas===1?'Contado':`${planSeleccionado.cuotas} cuotas de ${fmtPrice(cuota)} (Total: ${fmtPrice(total)})`):'Contado';
-  const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:fmtPrice(applyMarkup(i.precio)),qty:i.qty}))};
+  const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:fmtPrice(Math.round(i.precio||0)),qty:i.qty}))};
   const btn=document.getElementById('btn-enviar');
   if(btn){btn.disabled=true;btn.textContent='Enviando…';}
   try{ await fetch(SERVIDOR_URL+'/presupuesto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); }catch(e){ console.log(e); }
@@ -562,7 +561,7 @@ async function sendWebChat() {
   try {
     const productos = allProducts.map(p => ({
       codigo: p.codigo, nombre: p.nombre,
-      precio: Math.round(p.precio * 1.05),
+      precio: Math.round(p.precio||0),
       categoria: p.categoria,
     }));
 
@@ -625,14 +624,11 @@ function appendWebTyping() {
 function appendWebProduct(p) {
   const container = document.getElementById('web-chat-messages');
   if(!container) return;
-  // Normalize codigo for comparison
-  const codigoNorm = formatCodigo(p.codigo);
-  const prod = allProducts.find(x => formatCodigo(x.codigo) === codigoNorm);
-  const price = prod ? roundClean(prod.precio * PRICE_MARKUP) : Math.round(p.precio || 0);
-  const codigoModal = prod ? prod.codigo : p.codigo;
-  const div = document.createElement('div');
+  console.log('Buscando codigo:', p.codigo, 'en allProducts:', allProducts.slice(0,3).map(x=>x.codigo));
+  const prod = allProducts.find(x => x.codigo.replace(/\.0$/,'') === String(p.codigo).replace(/\.0$/,''));
+  const price = prod ? Math.round(prod.precio||0) : Math.round(p.precio || 0);
   div.style.cssText = 'display:flex;align-items:flex-start';
-  div.innerHTML = `<div onclick="openProdModal('${esc(String(codigoModal))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+  div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo).replace(/\.0$/,''))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
     <div style="width:48px;height:48px;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;overflow:hidden">
       ${p.imagen_url?`<img src="${esc(p.imagen_url)}" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'"/>`:'<span style="font-size:20px">📦</span>'}
     </div>

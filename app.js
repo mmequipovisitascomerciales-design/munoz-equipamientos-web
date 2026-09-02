@@ -26,6 +26,7 @@ function scrollToSection(id){ document.getElementById(id)?.scrollIntoView({behav
 
 // ── STATE ──────────────────────────────────────────────────
 let allProducts = [], categorias = [], cart = [], planes = [];
+let datosCliente = {nombre:'', telefono:'', obs:''};
 let filteredProducts = [], prodPage = 1;
 let planSeleccionado = null, checkoutStep = 1;
 let heroSlides = [], heroIndex = 0, heroInterval = null;
@@ -375,6 +376,7 @@ function renderResumenStep(modal){
   const nombre=(document.getElementById('c-nombre')?.value.trim()||'')+' '+(document.getElementById('c-apellido')?.value.trim()||'');
   const tel=document.getElementById('c-tel')?.value.trim()||'';
   const obs=document.getElementById('c-obs')?.value.trim()||'';
+  datosCliente = {nombre: nombre.trim(), telefono: tel, obs};
   const sub=calcTotal(); const total=calcConInteres(sub,planSeleccionado); const cuota=cuotaValor(total,planSeleccionado);
   const planTxt=planSeleccionado?(planSeleccionado.cuotas===1?'Contado':`${planSeleccionado.cuotas} cuotas de ${fmtPrice(cuota)}`):'Contado';
   const itemsHTML=cart.map(item=>`<div class="resumen-item"><div class="resumen-item-name">${esc(item.nombre)}</div><div class="resumen-item-qty">x${item.qty}</div><div class="resumen-item-price">${fmtPrice(Math.round(item.precio||0)*item.qty)}</div></div>`).join('');
@@ -389,9 +391,10 @@ function renderResumenStep(modal){
 }
 
 async function enviarPresupuesto(){
-  const nombre=(document.getElementById('c-nombre')?.value.trim()||'')+' '+(document.getElementById('c-apellido')?.value.trim()||'');
-  const tel=document.getElementById('c-tel')?.value.trim()||'';
-  const obs=document.getElementById('c-obs')?.value.trim()||'';
+  const nombre = datosCliente.nombre;
+  const tel = datosCliente.telefono;
+  const obs = datosCliente.obs;
+  datosCliente = {nombre: nombre.trim(), telefono: tel, obs};
   const sub=calcTotal(); const total=calcConInteres(sub,planSeleccionado); const cuota=cuotaValor(total,planSeleccionado);
   const planTxt=planSeleccionado?(planSeleccionado.cuotas===1?'Contado':`${planSeleccionado.cuotas} cuotas de ${fmtPrice(cuota)} (Total: ${fmtPrice(total)})`):'Contado';
   const payload={cliente:nombre.trim(),telefono:tel,plan:planTxt,observaciones:obs,items:cart.map(i=>({nombre:i.nombre,codigo:formatCodigo(i.codigo),precio:Math.round(i.precio||0),qty:i.qty}))};

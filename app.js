@@ -626,7 +626,7 @@ function appendWebProduct(p) {
   const container = document.getElementById('web-chat-messages');
   if(!container) return;
   console.log('Buscando codigo:', p.codigo, 'en allProducts:', allProducts.slice(0,3).map(x=>x.codigo));
-  const prod = allProducts.find(x => String(x.codigo) === String(p.codigo));
+  const prod = allProducts.find(x => x.codigo.replace(/\.0$/,'') === String(p.codigo).replace(/\.0$/,''));
   const price = prod ? roundClean(prod.precio * PRICE_MARKUP) : Math.round(p.precio || 0);
   div.style.cssText = 'display:flex;align-items:flex-start';
   div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">

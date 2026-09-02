@@ -629,7 +629,7 @@ function appendWebProduct(p) {
   const prod = allProducts.find(x => x.codigo.replace(/\.0$/,'') === String(p.codigo).replace(/\.0$/,''));
   const price = prod ? roundClean(prod.precio * PRICE_MARKUP) : Math.round(p.precio || 0);
   div.style.cssText = 'display:flex;align-items:flex-start';
-  div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+  div.innerHTML = `<div onclick="openProdModal('${esc(String(p.codigo).replace(/\.0$/,''))}')" style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;max-width:90%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
     <div style="width:48px;height:48px;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;overflow:hidden">
       ${p.imagen_url?`<img src="${esc(p.imagen_url)}" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'"/>`:'<span style="font-size:20px">📦</span>'}
     </div>

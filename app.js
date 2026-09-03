@@ -531,17 +531,23 @@ function injectWebChat() {
     </style>
   `);
 
-  const container = document.getElementById('web-chat-messages');
-  if(container && webChatHistory.length > 0) {
-    container.innerHTML = '';
-    webChatHistory.forEach(m => appendWebMsg(m.content.replace(/\[COD:[^\]]+\]/g,'').trim(), m.role==='user'?'user':'ai'));
-  }
-
   // Hide bubble after 5s
   setTimeout(() => {
     const b = document.getElementById('ia-bubble-web');
     if(b) b.style.display = 'none';
   }, 5000);
+
+  // Restore chat history after a brief delay
+  setTimeout(() => {
+    const container = document.getElementById('web-chat-messages');
+    if(container && webChatHistory.length > 0) {
+      container.innerHTML = '';
+      webChatHistory.forEach(m => {
+        const role = m.role === 'user' ? 'user' : 'ai';
+        appendWebMsg(m.content.replace(/\[COD:[^\]]+\]/g,'').trim(), role);
+      });
+    }
+  }, 100);
 }
 
 function toggleWebChat() {

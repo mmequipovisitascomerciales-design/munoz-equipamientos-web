@@ -531,6 +531,12 @@ function injectWebChat() {
     </style>
   `);
 
+  const container = document.getElementById('web-chat-messages');
+  if(container && webChatHistory.length > 0) {
+    container.innerHTML = '';
+    webChatHistory.forEach(m => appendWebMsg(m.content.replace(/\[COD:[^\]]+\]/g,'').trim(), m.role==='user'?'user':'ai'));
+  }
+
   // Hide bubble after 5s
   setTimeout(() => {
     const b = document.getElementById('ia-bubble-web');

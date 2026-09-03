@@ -248,12 +248,16 @@ function openProdModal(codigo){
   document.getElementById('modal-img').innerHTML=p.imagen?`<img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" style="width:100%;height:100%;object-fit:contain">`:`<span class="prod-modal-placeholder">${getCatIcon(p.categoria)}</span>`;
   document.getElementById('modal-info').innerHTML=`
     <button class="prod-modal-close" onclick="closeProdModal()">✕</button>
-    <div class="prod-modal-codigo">COD. ${formatCodigo(p.codigo)}</div>
-    <div class="prod-modal-name">${esc(p.nombre)}</div>
-    <div class="prod-modal-price">${fmtPrice(price)}</div>
-    <div class="prod-modal-divider"></div>
-    ${p.descripcion?`<div class="prod-modal-desc">${p.descripcion.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>`:''}
-    <div class="prod-modal-footer">
+    <div style="flex-shrink:0">
+      <div class="prod-modal-codigo">COD. ${formatCodigo(p.codigo)}</div>
+      <div class="prod-modal-name">${esc(p.nombre)}</div>
+      <div class="prod-modal-price">${fmtPrice(price)}</div>
+      <div class="prod-modal-divider"></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding-right:4px">
+      ${p.descripcion?`<div class="prod-modal-desc" style="white-space:pre-line">${p.descripcion.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>`:''}
+    </div>
+    <div class="prod-modal-footer" style="flex-shrink:0">
       <button class="btn-modal-add ${inCart?'added':''}" id="modal-add-btn" onclick="addToCart('${esc(p.codigo)}');this.classList.add('added');this.innerHTML='<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'20\\' height=\\'20\\' fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke=\\'currentColor\\'><polyline points=\\'20 6 9 17 4 12\\'/></svg> Agregado'">
         ${inCart?`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> Agregado`:`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg> Agregar al carrito`}
       </button>

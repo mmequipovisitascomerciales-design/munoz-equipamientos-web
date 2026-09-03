@@ -459,7 +459,7 @@ async function initShared(){
 // ══════════════════════════════════════
 // CHAT IA — WEB
 // ══════════════════════════════════════
-let webChatHistory = [];
+let webChatHistory = JSON.parse(sessionStorage.getItem('mm_chat_history') || '[]');
 let webChatOpen = false;
 
 function injectWebChat() {
@@ -559,6 +559,7 @@ async function sendWebChat() {
 
   appendWebMsg(msg, 'user');
   webChatHistory.push({ role:'user', content: msg });
+  sessionStorage.setItem('mm_chat_history', JSON.stringify(webChatHistory));
 
   const typingEl = appendWebTyping();
 

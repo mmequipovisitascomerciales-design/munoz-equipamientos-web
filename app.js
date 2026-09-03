@@ -549,7 +549,7 @@ function injectWebChat() {
       const chatCards = JSON.parse(sessionStorage.getItem('mm_chat_cards') || '[]');
       chatCards.forEach(p => appendWebProduct(p));
     }
-  }, 100);
+  }, 500);
 }
 
 function toggleWebChat() {

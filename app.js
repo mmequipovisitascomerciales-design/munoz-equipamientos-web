@@ -582,6 +582,7 @@ async function sendWebChat() {
       const cleanText = data.text.replace(/\[COD:[^\]]+\]/g, '').trim();
       appendWebMsg(cleanText, 'ai');
       webChatHistory.push({ role:'assistant', content: data.text });
+      sessionStorage.setItem('mm_chat_history', JSON.stringify(webChatHistory));
       if(data.productosRecomendados?.length) {
         data.productosRecomendados.forEach(p => appendWebProduct(p));
       }

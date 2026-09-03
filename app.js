@@ -546,6 +546,8 @@ function injectWebChat() {
         const role = m.role === 'user' ? 'user' : 'ai';
         appendWebMsg(m.content.replace(/\[COD:[^\]]+\]/g,'').trim(), role);
       });
+      const chatCards = JSON.parse(sessionStorage.getItem('mm_chat_cards') || '[]');
+      chatCards.forEach(p => appendWebProduct(p));
     }
   }, 100);
 }
@@ -596,7 +598,12 @@ async function sendWebChat() {
       webChatHistory.push({ role:'assistant', content: data.text });
       sessionStorage.setItem('mm_chat_history', JSON.stringify(webChatHistory));
       if(data.productosRecomendados?.length) {
-        data.productosRecomendados.forEach(p => appendWebProduct(p));
+        data.productosRecomendados.forEach(p => {
+          appendWebProduct(p);
+          const chatCards = JSON.parse(sessionStorage.getItem('mm_chat_cards') || '[]');
+          chatCards.push(p);
+          sessionStorage.setItem('mm_chat_cards', JSON.stringify(chatCards));
+        });
       }
     } else {
       appendWebMsg('Hubo un error. Intentá de nuevo.', 'ai');

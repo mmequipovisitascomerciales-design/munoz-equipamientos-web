@@ -96,6 +96,13 @@
   <div class="hero-indicators" id="hero-indicators"></div>
 </section>
 
+<section class="ofertas-section" id="ofertas">
+  <h2>Ofertas y Promociones</h2>
+  <p class="subtitulo">Equipamientos seleccionados del mes</p>
+  <div class="ofertas-grid" id="ofertas-grid"></div>
+</section>
+
+
 <!-- CATEGORÍAS -->
 <section class="section" id="categorias">
   <div class="section-inner">
@@ -213,5 +220,40 @@ Nuestro objetivo es brindar equipamiento de calidad y asesoramiento a medida, ay
   loadConfig();
   initShared();
 </script>
+
+<script>
+(async function cargarOfertas() {
+  const SB_URL = "https://ncagcvtkporoapumenoo.supabase.co";
+  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYWdjdnRrcG9yb2FwdW1lbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwODI4NDQsImV4cCI6MjA5OTY1ODg0NH0.NZZ4lXDAXZR5bOAaUqT-JaRR4X4Z7Io0WYiCnU1GxlU";
+  const grid = document.getElementById('ofertas-grid');
+  if (!grid) return;
+  try {
+    const res = await fetch(
+      SB_URL + '/rest/v1/config_app?clave=in.(ofertas_layout,ofertas_imagenes)&select=clave,valor',
+      { headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON } }
+    );
+    const cfg = await res.json();
+    let layout = '2x2', imgs = [];
+    if (Array.isArray(cfg)) {
+      cfg.forEach(r => {
+        if (r.clave === 'ofertas_layout') layout = r.valor || '2x2';
+        if (r.clave === 'ofertas_imagenes')
+          imgs = (r.valor || '').split(',').map(s => s.trim()).filter(Boolean);
+      });
+    }
+    if (!imgs.length) {
+      document.getElementById('ofertas').style.display = 'none';
+      return;
+    }
+    grid.className = 'ofertas-grid layout-' + layout;
+    grid.innerHTML = imgs.map(url =>
+      '<div class="oferta-img-wrap"><img class="oferta-img" src="' + url + '" alt="Oferta Muñoz Marchesi" loading="lazy"/></div>'
+    ).join('');
+  } catch(e) {
+    document.getElementById('ofertas').style.display = 'none';
+  }
+})();
+</script>
+
 </body>
 </html>

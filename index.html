@@ -592,9 +592,14 @@ async function loadProducts() {
     try {
       const dest = await sbFetch('/rest/v1/articulos?select=codigo,destacado&limit=2000');
       if (Array.isArray(dest) && dest.length) {
+        // Normalizar códigos: quitar ceros a la izquierda para que coincidan
+        const norm = c => String(c).replace(/^0+/, '') || '0';
         const destMap = {};
-        dest.forEach(d => { destMap[d.codigo] = d.destacado; });
-        allProducts.forEach(p => { p.destacado = destMap[p.codigo] === true; });
+        dest.forEach(d => { destMap[norm(d.codigo)] = d.destacado; });
+        allProducts.forEach(p => {
+          const v = destMap[norm(p.codigo)];
+          p.destacado = v === true || v === 'true' || v === 't' || v === 1 || v === '1';
+        });
         console.log('[MM] Campo destacado cargado OK');
       }
     } catch(e2) {
@@ -1240,7 +1245,7 @@ function renderDestacados() {
   const grid = document.getElementById('destacados-grid');
   if (!grid) return;
   // Debug: ver qué valores tiene el campo destacado
-  const muestra = allProducts.slice(0,5).map(p => `${p.codigo}: destacado=${JSON.stringify(p.destacado)}`);
+  const muestra = allProducts.slice(0,5).map(p => `${p.codigo}: destacado=${JSON.stringify(p.destacado)} (tipo:${typeof p.destacado})`);
   console.log('[destacados] total productos:', allProducts.length);
   console.log('[destacados] muestra de valores:', muestra);
   const toShow = allProducts.filter(p => p.destacado === true || p.destacado === 't' || p.destacado === 1).slice(0, 8);

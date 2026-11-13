@@ -415,11 +415,12 @@ let filterCat = '';
 let filterOrder = '';
 let currentModalProduct = null;
 let currentDetailProduct = null;
-let heroSlides = [];
-let heroTipo   = 'imagenes';
-let heroVideo  = '';
-let heroIdx    = 0;
-let heroTimer  = null;
+let heroSlides       = [];
+let heroTipo         = 'imagenes';
+let heroVideo        = '';
+let heroIdx          = 0;
+let heroTimer        = null;
+let destacadosCodigos = []; // lista de códigos desde config_app
 
 // ═══════════════════════════════════════════════════════
 // ROUTER (hash-based)
@@ -569,6 +570,7 @@ async function loadConfig() {
       if (r.clave === 'web_hero_tipo')       heroTipo    = r.valor || 'imagenes';
       if (r.clave === 'web_hero_video_url')  heroVideo   = r.valor || '';
       if (r.clave === 'web_hero_imagenes')   heroSlides  = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
+      if (r.clave === 'web_destacados')      destacadosCodigos = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
       if (r.clave === 'logo_url' && r.valor) {
         document.querySelectorAll('#nav-logo-img,#footer-logo-img').forEach(img => img.src = r.valor);
       }
@@ -593,18 +595,9 @@ async function loadProducts() {
       const dest = await sbFetch('/rest/v1/articulos?select=codigo,destacado&limit=2000');
       if (Array.isArray(dest) && dest.length) {
         // Normalizar códigos: quitar ceros a la izquierda para que coincidan
-        const norm = c => String(c).replace(/^0+/, '') || '0';
-        const destMap = {};
-        dest.forEach(d => { destMap[norm(d.codigo)] = d.destacado; });
-        allProducts.forEach(p => {
-          const v = destMap[norm(p.codigo)];
-          p.destacado = v === true || v === 'true' || v === 't' || v === 1 || v === '1';
-        });
-        console.log('[MM] Campo destacado cargado OK');
+        // (campo destacado por columna — no usado)
       }
-    } catch(e2) {
-      console.warn('[MM] No se pudo cargar campo destacado:', e2.message);
-    }
+    } catch(e2) { /* ignorar */ }
   } catch(e) {
     console.error('loadProducts error:', e);
     allProducts = [];
@@ -1244,12 +1237,14 @@ function enviarPedido() {
 function renderDestacados() {
   const grid = document.getElementById('destacados-grid');
   if (!grid) return;
-  // Debug: ver qué valores tiene el campo destacado
-  const muestra = allProducts.slice(0,5).map(p => `${p.codigo}: destacado=${JSON.stringify(p.destacado)} (tipo:${typeof p.destacado})`);
-  console.log('[destacados] total productos:', allProducts.length);
-  console.log('[destacados] muestra de valores:', muestra);
-  const toShow = allProducts.filter(p => p.destacado === true || p.destacado === 't' || p.destacado === 1).slice(0, 8);
-  console.log('[destacados] encontrados:', toShow.length, toShow.map(p=>p.codigo));
+  if (!destacadosCodigos.length) { document.getElementById('destacados').style.display='none'; return; }
+  const norm = c => String(c).replace(/^0+/,'') || '0';
+  const setCodigos = new Set(destacadosCodigos.map(norm));
+  // Respetar el orden definido en config
+  const toShow = destacadosCodigos
+    .map(cod => allProducts.find(p => norm(p.codigo) === norm(cod)))
+    .filter(Boolean)
+    .slice(0, 8);
   if (!toShow.length) { document.getElementById('destacados').style.display='none'; return; }
   document.getElementById('destacados').style.display = '';
   grid.innerHTML = toShow.map(p => renderProdCard(p)).join('');

@@ -1230,9 +1230,9 @@ function enviarPedido() {
 function renderDestacados() {
   const grid = document.getElementById('destacados-grid');
   if (!grid) return;
-  const list = allProducts.filter(p => p.destacado || p.featured).slice(0, 8);
-  const toShow = list.length ? list : allProducts.slice(0, 8);
+  const toShow = allProducts.filter(p => p.destacado === true).slice(0, 8);
   if (!toShow.length) { document.getElementById('destacados').style.display='none'; return; }
+  document.getElementById('destacados').style.display = '';
   grid.innerHTML = toShow.map(p => renderProdCard(p)).join('');
 }
 

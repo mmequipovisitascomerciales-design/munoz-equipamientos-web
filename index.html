@@ -584,10 +584,10 @@ async function loadConfig() {
 
 async function loadProducts() {
   try {
-    // Intentar con la vista articulos_final primero (como usa la app kiosk)
-    let data = await sbFetch('/rest/v1/articulos_final?select=*&order=nombre.asc&limit=2000');
+    // Cargar desde articulos directamente para tener todos los campos (inc. destacado)
+    let data = await sbFetch('/rest/v1/articulos?select=*&activo=eq.true&order=nombre.asc&limit=2000');
     if (!Array.isArray(data) || !data.length) {
-      // Fallback a articulos sin filtro activo (el campo puede no existir o tener otro nombre)
+      // Fallback sin filtro activo por si el campo tiene otro nombre
       data = await sbFetch('/rest/v1/articulos?select=*&order=nombre.asc&limit=2000');
     }
     allProducts = Array.isArray(data) ? data : [];

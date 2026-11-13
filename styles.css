@@ -279,10 +279,22 @@ input, select, textarea { font-family: inherit; }
   padding-top: var(--nav-h);
 }
 
-.hero-bg {
+.hero-media {
   position: absolute; inset: 0;
   background: linear-gradient(135deg, #0a0f1a 0%, #1e3d6e 100%);
   z-index: 0;
+  overflow: hidden;
+}
+/* Video hero */
+.hero-media .hero-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+/* Slideshow */
+.hero-media .hero-slides {
+  position: absolute; inset: 0;
 }
 .hero-slide {
   position: absolute; inset: 0;

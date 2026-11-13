@@ -78,7 +78,7 @@
 
   <!-- HERO -->
   <section class="hero" id="inicio">
-    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-media" id="hero-media"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <span class="hero-eyebrow">Equipamiento Comercial — Villa Ángela, Chaco</span>
@@ -416,8 +416,10 @@ let filterOrder = '';
 let currentModalProduct = null;
 let currentDetailProduct = null;
 let heroSlides = [];
-let heroIdx = 0;
-let heroTimer = null;
+let heroTipo   = 'imagenes';
+let heroVideo  = '';
+let heroIdx    = 0;
+let heroTimer  = null;
 
 // ═══════════════════════════════════════════════════════
 // ROUTER (hash-based)
@@ -562,10 +564,11 @@ async function loadConfig() {
       await cargarOfertas([]);
       return;
     }
+    // Leer las claves correctas igual que app.js
     cfg.forEach(r => {
-      if (r.clave === 'hero_slides' || r.clave === 'hero_imagenes') {
-        heroSlides = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
-      }
+      if (r.clave === 'web_hero_tipo')       heroTipo    = r.valor || 'imagenes';
+      if (r.clave === 'web_hero_video_url')  heroVideo   = r.valor || '';
+      if (r.clave === 'web_hero_imagenes')   heroSlides  = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
       if (r.clave === 'logo_url' && r.valor) {
         document.querySelectorAll('#nav-logo-img,#footer-logo-img').forEach(img => img.src = r.valor);
       }
@@ -596,9 +599,9 @@ async function loadProducts() {
 
 async function loadCategories() {
   try {
-    // Sin filtro activo para evitar incompatibilidades de tipo
-    const data = await sbFetch('/rest/v1/categorias?select=*&order=nombre.asc');
-    allCategories = Array.isArray(data) ? data.filter(c => c.activo !== false) : [];
+    // Campo correcto: activa (no activo), orden por orden.asc (como en app.js)
+    const data = await sbFetch('/rest/v1/categorias?select=*&activa=eq.true&order=orden.asc');
+    allCategories = Array.isArray(data) ? data : [];
   } catch(e) {
     console.error('loadCategories error:', e);
     allCategories = [];
@@ -611,23 +614,35 @@ async function loadCategories() {
 // HERO
 // ═══════════════════════════════════════════════════════
 function renderHero() {
-  const bg = document.getElementById('hero-bg');
-  if (!heroSlides.length) {
-    bg.style.background = 'linear-gradient(135deg,#0a0f1a 0%,#1e3d6e 100%)';
+  const media = document.getElementById('hero-media');
+  if (!media) return;
+  // Tipo video — igual que app.js
+  if (heroTipo === 'video' && heroVideo) {
+    media.innerHTML = `<video class="hero-video" autoplay muted loop playsinline>
+      <source src="${heroVideo}" type="video/mp4">
+    </video>`;
     return;
   }
-  bg.innerHTML = heroSlides.map((url, i) =>
-    `<div class="hero-slide${i===0?' active':''}" style="background-image:url('${url}')"></div>`
-  ).join('');
-  if (heroSlides.length > 1) {
-    clearInterval(heroTimer);
-    heroTimer = setInterval(() => {
-      const slides = bg.querySelectorAll('.hero-slide');
-      slides[heroIdx].classList.remove('active');
-      heroIdx = (heroIdx + 1) % slides.length;
-      slides[heroIdx].classList.add('active');
-    }, 5000);
+  // Tipo imagenes (slideshow)
+  if (heroSlides.length) {
+    media.innerHTML = `<div class="hero-slides">` +
+      heroSlides.map((url, i) =>
+        `<div class="hero-slide${i===0?' active':''}" style="background-image:url('${url}')"></div>`
+      ).join('') +
+    `</div>`;
+    if (heroSlides.length > 1) {
+      clearInterval(heroTimer);
+      heroTimer = setInterval(() => {
+        const slides = media.querySelectorAll('.hero-slide');
+        slides[heroIdx].classList.remove('active');
+        heroIdx = (heroIdx + 1) % slides.length;
+        slides[heroIdx].classList.add('active');
+      }, 5000);
+    }
+    return;
   }
+  // Fallback: gradiente
+  media.style.background = 'linear-gradient(135deg,#0a0f1a 0%,#1e3d6e 100%)';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -667,13 +682,14 @@ function renderNavCategories() {
   const dd = document.getElementById('nav-cat-dropdown');
   const sel = document.getElementById('filter-cat');
   if (!dd) return;
+  // Campos reales: c.clave (slug) y c.label (nombre visible)
   dd.innerHTML = `<a class="nav-cat-item" href="#/catalogo" onclick="document.getElementById('nav-cat-dropdown').classList.remove('open')">Todos los productos</a>` +
     allCategories.map(c =>
-      `<a class="nav-cat-item" href="#/catalogo?cat=${encodeURIComponent(c.slug||c.nombre)}" onclick="document.getElementById('nav-cat-dropdown').classList.remove('open');document.getElementById('cat-chevron').style.transform=''">${c.nombre}</a>`
+      `<a class="nav-cat-item" href="#/catalogo?cat=${encodeURIComponent(c.clave)}" onclick="document.getElementById('nav-cat-dropdown').classList.remove('open');document.getElementById('cat-chevron').style.transform=''">${c.label}</a>`
     ).join('');
   if (sel) {
     sel.innerHTML = '<option value="">Todas las categorías</option>' +
-      allCategories.map(c => `<option value="${c.slug||c.nombre}">${c.nombre}</option>`).join('');
+      allCategories.map(c => `<option value="${c.clave}">${c.label}</option>`).join('');
   }
 }
 
@@ -681,7 +697,7 @@ function renderFooterCategories() {
   const el = document.getElementById('footer-cats');
   if (!el) return;
   el.innerHTML = allCategories.slice(0,6).map(c =>
-    `<a href="#/catalogo?cat=${encodeURIComponent(c.slug||c.nombre)}">${c.nombre}</a>`
+    `<a href="#/catalogo?cat=${encodeURIComponent(c.clave)}">${c.label}</a>`
   ).join('');
 }
 
@@ -691,11 +707,12 @@ function renderHomeCategories() {
   if (!allCategories.length) { grid.innerHTML = '<p style="color:var(--text-3);font-size:14px">No hay categorías disponibles.</p>'; return; }
   grid.innerHTML = allCategories.map(c => {
     const hasImg = c.imagen_url;
-    return `<div class="cat-card${hasImg?'':' cat-card-no-img'}" onclick="navigate('/catalogo?cat=${encodeURIComponent(c.slug||c.nombre)}')">
+    const count = allProducts.filter(p => p.categoria === c.clave).length;
+    return `<div class="cat-card${hasImg?'':' cat-card-no-img'}" onclick="navigate('/catalogo?cat=${encodeURIComponent(c.clave)}')">
       ${hasImg ? `<div class="cat-card-img" style="background-image:url('${c.imagen_url}')"></div><div class="cat-card-overlay"></div>` : `<div class="cat-card-placeholder">${c.emoji||'🏪'}</div>`}
       <div class="cat-card-body">
-        <div class="cat-card-name">${c.nombre}</div>
-        ${c.total ? `<div class="cat-card-count">${c.total} productos</div>` : ''}
+        <div class="cat-card-name">${c.label}</div>
+        ${count ? `<div class="cat-card-count">${count} artículos</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -725,7 +742,8 @@ function getFilteredProducts() {
     list = list.filter(p => (p.nombre||'').toLowerCase().includes(q) || (p.codigo||'').toLowerCase().includes(q) || (p.descripcion||'').toLowerCase().includes(q));
   }
   if (filterCat) {
-    list = list.filter(p => (p.categoria_slug||p.categoria||'') === filterCat || slugify(p.categoria||'') === filterCat);
+    // p.categoria contiene el valor de c.clave de la categoría
+    list = list.filter(p => (p.categoria||'') === filterCat);
   }
   if (filterOrder === 'az') list.sort((a,b) => (a.nombre||'').localeCompare(b.nombre||''));
   if (filterOrder === 'za') list.sort((a,b) => (b.nombre||'').localeCompare(a.nombre||''));
@@ -772,8 +790,9 @@ function renderCatalogUI() {
   const titleEl = document.getElementById('catalog-title');
   if (titleEl) {
     if (filterCat) {
-      const cat = allCategories.find(c => (c.slug||c.nombre) === filterCat || slugify(c.nombre||'') === filterCat);
-      titleEl.textContent = cat ? cat.nombre : 'Catálogo';
+      // Buscar por c.clave (que es el valor que llega en la URL como ?cat=...)
+      const cat = allCategories.find(c => c.clave === filterCat);
+      titleEl.textContent = cat ? cat.label : 'Catálogo';
     } else { titleEl.textContent = 'Catálogo'; }
   }
 

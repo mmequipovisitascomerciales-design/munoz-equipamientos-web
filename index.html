@@ -390,17 +390,17 @@
 </footer>
 
 <!-- SCRIPTS -->
-<script src="app.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG + SUPABASE
+// Usamos nombres propios para no colisionar con app.js
 // ═══════════════════════════════════════════════════════
-const SB_URL = "https://ncagcvtkporoapumenoo.supabase.co";
-const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYWdjdnRrcG9yb2FwdW1lbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwODI4NDQsImV4cCI6MjA5OTY1ODg0NH0.7LyvoGFFI4KWRDq5JgNFOpkGjtlplTDRX_kCHjoXXNc";
-const SB_H = { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON };
+const MM_SB_URL = "https://ncagcvtkporoapumenoo.supabase.co";
+const MM_SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYWdjdnRrcG9yb2FwdW1lbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwODI4NDQsImV4cCI6MjA5OTY1ODg0NH0.7LyvoGFFI4KWRDq5JgNFOpkGjtlplTDRX_kCHjoXXNc";
+const MM_SB_H = { 'apikey': MM_SB_ANON, 'Authorization': 'Bearer ' + MM_SB_ANON };
 const WA_NUM = "5493735564943";
 
-const sbFetch = (path) => fetch(SB_URL + path, { headers: SB_H }).then(r => r.json());
+const sbFetch = (path) => fetch(MM_SB_URL + path, { headers: MM_SB_H }).then(r => r.json());
 
 // ═══════════════════════════════════════════════════════
 // ESTADO GLOBAL

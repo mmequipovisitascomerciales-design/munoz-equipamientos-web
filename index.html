@@ -556,7 +556,12 @@ function onNavSearch(val) {
 async function loadConfig() {
   try {
     const cfg = await sbFetch('/rest/v1/config_app?select=clave,valor');
-    if (!Array.isArray(cfg)) return;
+    if (!Array.isArray(cfg)) {
+      console.warn('config_app no devolvió array:', cfg);
+      renderHero();
+      await cargarOfertas([]);
+      return;
+    }
     cfg.forEach(r => {
       if (r.clave === 'hero_slides' || r.clave === 'hero_imagenes') {
         heroSlides = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
@@ -566,22 +571,38 @@ async function loadConfig() {
       }
     });
     renderHero();
-    cargarOfertas(cfg);
-  } catch(e) {}
+    await cargarOfertas(cfg);
+  } catch(e) {
+    console.error('loadConfig error:', e);
+    renderHero();
+    await cargarOfertas([]);
+  }
 }
 
 async function loadProducts() {
   try {
-    const data = await sbFetch('/rest/v1/articulos?select=*&activo=eq.true&order=nombre.asc&limit=1000');
+    // Intentar con la vista articulos_final primero (como usa la app kiosk)
+    let data = await sbFetch('/rest/v1/articulos_final?select=*&order=nombre.asc&limit=2000');
+    if (!Array.isArray(data) || !data.length) {
+      // Fallback a articulos sin filtro activo (el campo puede no existir o tener otro nombre)
+      data = await sbFetch('/rest/v1/articulos?select=*&order=nombre.asc&limit=2000');
+    }
     allProducts = Array.isArray(data) ? data : [];
-  } catch(e) { allProducts = []; }
+  } catch(e) {
+    console.error('loadProducts error:', e);
+    allProducts = [];
+  }
 }
 
 async function loadCategories() {
   try {
-    const data = await sbFetch('/rest/v1/categorias?select=*&activo=eq.true&order=nombre.asc');
-    allCategories = Array.isArray(data) ? data : [];
-  } catch(e) { allCategories = []; }
+    // Sin filtro activo para evitar incompatibilidades de tipo
+    const data = await sbFetch('/rest/v1/categorias?select=*&order=nombre.asc');
+    allCategories = Array.isArray(data) ? data.filter(c => c.activo !== false) : [];
+  } catch(e) {
+    console.error('loadCategories error:', e);
+    allCategories = [];
+  }
   renderNavCategories();
   renderFooterCategories();
 }
@@ -616,9 +637,15 @@ async function cargarOfertas(cfg) {
   const grid = document.getElementById('ofertas-grid');
   const sec = document.getElementById('ofertas');
   if (!grid || !sec) return;
-  let cfgArr = cfg || [];
-  if (!cfgArr.length) {
-    try { cfgArr = await sbFetch('/rest/v1/config_app?clave=in.(ofertas_layout,ofertas_imagenes)&select=clave,valor'); } catch(e) {}
+  let cfgArr = Array.isArray(cfg) ? cfg : [];
+  // Si no vienen datos de config_app, hacer fetch propio
+  const tieneOfertas = cfgArr.some(r => r.clave === 'ofertas_imagenes' || r.clave === 'ofertas_layout');
+  if (!tieneOfertas) {
+    try {
+      // Formato correcto PostgREST para IN: clave=in.(val1,val2)
+      const data = await sbFetch('/rest/v1/config_app?select=clave,valor&clave=in.(ofertas_layout,ofertas_imagenes)');
+      if (Array.isArray(data) && data.length) cfgArr = data;
+    } catch(e) { console.error('cargarOfertas fetch error:', e); }
   }
   let layout='2x2', imgs=[];
   cfgArr.forEach(r => {
@@ -835,15 +862,21 @@ async function loadProductDetail(code) {
     p = allProducts.find(x => String(x.codigo||x.id) === String(code));
   }
   if (!p) {
-    // Try direct fetch
+    // Búsqueda directa en Supabase
     try {
-      const data = await sbFetch(`/rest/v1/articulos?codigo=eq.${encodeURIComponent(code)}&select=*&limit=1`);
-      if (Array.isArray(data) && data.length) p = data[0];
+      // Intentar primero en articulos_final
+      let data = await sbFetch(`/rest/v1/articulos_final?select=*&codigo=eq.${encodeURIComponent(code)}&limit=1`);
+      if (Array.isArray(data) && data.length) { p = data[0]; }
       else {
-        const data2 = await sbFetch(`/rest/v1/articulos?id=eq.${encodeURIComponent(code)}&select=*&limit=1`);
-        if (Array.isArray(data2) && data2.length) p = data2[0];
+        // Fallback a articulos
+        data = await sbFetch(`/rest/v1/articulos?select=*&codigo=eq.${encodeURIComponent(code)}&limit=1`);
+        if (Array.isArray(data) && data.length) { p = data[0]; }
+        else {
+          data = await sbFetch(`/rest/v1/articulos?select=*&id=eq.${encodeURIComponent(code)}&limit=1`);
+          if (Array.isArray(data) && data.length) p = data[0];
+        }
       }
-    } catch(e) {}
+    } catch(e) { console.error('loadProductDetail fetch error:', e); }
   }
   if (!p) {
     document.getElementById('prod-detail-name').textContent = 'Producto no encontrado';
@@ -1202,7 +1235,12 @@ window.addEventListener('scroll', () => {
 (async function init() {
   updateCartBadge();
   renderCart();
+  console.log('[MM] Iniciando carga de datos…');
   await Promise.all([loadConfig(), loadCategories(), loadProducts()]);
+  console.log('[MM] Productos cargados:', allProducts.length);
+  console.log('[MM] Categorías cargadas:', allCategories.length);
+  if (!allProducts.length) console.warn('[MM] ⚠ No se cargaron productos — verificar tabla y permisos Supabase');
+  if (!allCategories.length) console.warn('[MM] ⚠ No se cargaron categorías');
   renderHomeCategories();
   renderDestacados();
   handleRoute();

@@ -584,10 +584,22 @@ async function loadConfig() {
 
 async function loadProducts() {
   try {
-    // Sin filtro activo — la tabla articulos puede no tener ese campo expuesto
-    const data = await sbFetch('/rest/v1/articulos?select=*&order=nombre.asc&limit=2000');
+    // articulos_final es la vista con permisos públicos — usarla para los datos base
+    const data = await sbFetch('/rest/v1/articulos_final?select=*&order=nombre.asc&limit=2000');
     allProducts = Array.isArray(data) ? data : [];
     console.log('[MM] Productos cargados:', allProducts.length);
+    // Enriquecer con campo destacado desde articulos (solo codigo + destacado)
+    try {
+      const dest = await sbFetch('/rest/v1/articulos?select=codigo,destacado&limit=2000');
+      if (Array.isArray(dest) && dest.length) {
+        const destMap = {};
+        dest.forEach(d => { destMap[d.codigo] = d.destacado; });
+        allProducts.forEach(p => { p.destacado = destMap[p.codigo] === true; });
+        console.log('[MM] Campo destacado cargado OK');
+      }
+    } catch(e2) {
+      console.warn('[MM] No se pudo cargar campo destacado:', e2.message);
+    }
   } catch(e) {
     console.error('loadProducts error:', e);
     allProducts = [];

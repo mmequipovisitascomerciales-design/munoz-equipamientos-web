@@ -98,7 +98,7 @@ input, select, textarea { font-family: inherit; }
   margin-right: 40px;
 }
 .nav-logo img {
-  height: 36px;
+  height: 48px;
   width: auto;
   display: block;
 }
@@ -306,7 +306,10 @@ input, select, textarea { font-family: inherit; }
 
 .hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to right, rgba(10,15,26,.82) 0%, rgba(10,15,26,.4) 60%, rgba(10,15,26,.1) 100%);
+  /* Capa base oscura + degradado lateral para que el texto izquierdo sea siempre legible */
+  background:
+    linear-gradient(to bottom, rgba(10,15,26,.35) 0%, rgba(10,15,26,.55) 100%),
+    linear-gradient(to right,  rgba(10,15,26,.88) 0%, rgba(10,15,26,.55) 55%, rgba(10,15,26,.15) 100%);
   z-index: 1;
 }
 

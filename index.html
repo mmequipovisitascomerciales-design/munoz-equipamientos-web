@@ -1230,7 +1230,12 @@ function enviarPedido() {
 function renderDestacados() {
   const grid = document.getElementById('destacados-grid');
   if (!grid) return;
-  const toShow = allProducts.filter(p => p.destacado === true).slice(0, 8);
+  // Debug: ver qué valores tiene el campo destacado
+  const muestra = allProducts.slice(0,5).map(p => `${p.codigo}: destacado=${JSON.stringify(p.destacado)}`);
+  console.log('[destacados] total productos:', allProducts.length);
+  console.log('[destacados] muestra de valores:', muestra);
+  const toShow = allProducts.filter(p => p.destacado === true || p.destacado === 't' || p.destacado === 1).slice(0, 8);
+  console.log('[destacados] encontrados:', toShow.length, toShow.map(p=>p.codigo));
   if (!toShow.length) { document.getElementById('destacados').style.display='none'; return; }
   document.getElementById('destacados').style.display = '';
   grid.innerHTML = toShow.map(p => renderProdCard(p)).join('');

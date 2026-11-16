@@ -98,7 +98,7 @@ input, select, textarea { font-family: inherit; }
   margin-right: 40px;
 }
 .nav-logo img {
-  height: 48px;
+  height: 68px;
   width: auto;
   display: block;
 }
@@ -1346,8 +1346,8 @@ input, select, textarea { font-family: inherit; }
 }
 .footer-brand {}
 .footer-brand img {
-  height: 36px; width: auto; margin-bottom: 14px;
-  filter: brightness(0) invert(1) opacity(.85);
+  height: 64px; width: auto; margin-bottom: 14px;
+  filter: brightness(0) invert(1) opacity(.9);
 }
 .footer-brand p { font-size: 14px; line-height: 1.6; }
 .footer-col {}

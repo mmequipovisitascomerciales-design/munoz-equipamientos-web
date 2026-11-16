@@ -761,20 +761,14 @@ function getFilteredProducts() {
 }
 
 function renderCatalog() {
-  if (!allProducts.length) {
-    // Load then render
-    document.getElementById('prod-grid').innerHTML = '<div class="spinner"></div>';
-    loadProducts().then(() => { renderCatalogUI(); });
-  } else {
-    renderCatalogUI();
-  }
-  // Restore search from sessionStorage
+  // Restaurar filtros ANTES de renderizar
   const ss = sessionStorage.getItem('mm_search');
   if (ss && !filterSearch) { filterSearch = ss; sessionStorage.removeItem('mm_search'); }
-  // Restore cat from URL
+  // Leer cat de la URL y aplicar al estado y al selector
   const params = new URLSearchParams(location.hash.split('?')[1]||'');
   const catParam = params.get('cat');
   if (catParam) filterCat = catParam;
+  // Setear valores de los controles
   if (filterCat) {
     const sel = document.getElementById('filter-cat');
     if (sel) sel.value = filterCat;
@@ -782,6 +776,13 @@ function renderCatalog() {
   if (filterSearch) {
     const fi = document.getElementById('filter-search');
     if (fi) fi.value = filterSearch;
+  }
+  // Ahora sí renderizar con los filtros ya seteados
+  if (!allProducts.length) {
+    document.getElementById('prod-grid').innerHTML = '<div class="spinner"></div>';
+    loadProducts().then(() => { renderCatalogUI(); });
+  } else {
+    renderCatalogUI();
   }
 }
 
@@ -816,7 +817,7 @@ function renderCatalogUI() {
 
 function renderProdCard(p) {
   const inCart = cart.some(c => c.id === (p.id||p.codigo));
-  return `<div class="prod-card fade-in" onclick="openModal('${p.id||p.codigo}')">
+  return `<div class="prod-card fade-in" onclick="location.href='${productUrl(p)}'" style="cursor:pointer">
     <div class="prod-card-img">
       ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${p.nombre||''}" loading="lazy"/>` : `<div class="prod-card-placeholder">📦</div>`}
     </div>
@@ -946,7 +947,7 @@ async function loadProductDetail(code) {
   document.getElementById('prod-detail-code').textContent = p.codigo ? `Cód. ${p.codigo}` : '';
   document.getElementById('prod-detail-name').textContent = p.nombre||'Sin nombre';
   document.getElementById('prod-detail-price').textContent = p.precio ? formatPrice(p.precio) : '';
-  document.getElementById('prod-detail-desc').textContent = p.descripcion||'';
+  document.getElementById('prod-detail-desc').innerHTML = (p.descripcion||'').replace(/\n/g,'<br>');
 
   // WhatsApp
   const waText = `Hola! Me interesa este producto: *${p.nombre}*${p.codigo?' (Cód. '+p.codigo+')':''}. Podrían darme más información? ${url}`;
@@ -1249,9 +1250,13 @@ async function enviarPedido() {
     items: itemsToSend.map(i => ({
       nombre: i.nombre || '',
       codigo: i.codigo ? String(i.codigo) : '',
-      precio: i.precio ? formatPrice(i.precio) : '',
-      qty: i.qty
-    }))
+      precio: i.precio ? formatPrice(i.precio) : 'A consultar',
+      qty: i.qty,
+      subtotal: i.precio ? formatPrice(i.precio * i.qty) : 'A consultar'
+    })),
+    total: itemsToSend.reduce((s,i)=>s+(i.precio||0)*i.qty,0) > 0
+      ? formatPrice(itemsToSend.reduce((s,i)=>s+(i.precio||0)*i.qty,0))
+      : 'A consultar'
   };
 
   try {

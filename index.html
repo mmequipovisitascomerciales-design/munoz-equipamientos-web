@@ -576,7 +576,14 @@ async function loadConfig() {
       if (r.clave === 'web_hero_imagenes')   heroSlides  = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
       if (r.clave === 'web_destacados')      destacadosCodigos = (r.valor||'').split(',').map(s=>s.trim()).filter(Boolean);
       if (r.clave === 'logo_url' && r.valor) {
-        document.querySelectorAll('#nav-logo-img,#footer-logo-img').forEach(img => img.src = r.valor);
+        // Footer siempre usa logo_url; nav solo en home (fondo oscuro)
+        const footerLogo = document.getElementById('footer-logo-img');
+        if (footerLogo) footerLogo.src = r.valor;
+        const nav = document.getElementById('main-nav');
+        if (nav && nav.classList.contains('nav-transparent')) {
+          const navLogo = document.getElementById('nav-logo-img');
+          if (navLogo) navLogo.src = r.valor;
+        }
       }
     });
     renderHero();

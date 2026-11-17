@@ -1306,8 +1306,7 @@ window.addEventListener('scroll', () => {
     const scrolled = window.scrollY > 60;
     nav.classList.toggle('nav-scrolled', scrolled);
     // Swap logo: oscuro sobre fondo blanco, claro sobre hero
-    const logo = document.getElementById('nav-logo-img');
-    if (logo) logo.src = scrolled ? 'logo-oscuro.png' : 'logo.svg';
+    // Nav oscuro en home = logo blanco siempre; solo cambia a oscuro en otras páginas
   }
 }, { passive: true });
 

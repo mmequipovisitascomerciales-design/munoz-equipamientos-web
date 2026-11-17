@@ -1297,8 +1297,11 @@ window.addEventListener('scroll', () => {
   const nav = document.getElementById('main-nav');
   if (!nav) return;
   if (nav.classList.contains('nav-transparent')) {
-    if (window.scrollY > 60) nav.classList.add('nav-scrolled');
-    else nav.classList.remove('nav-scrolled');
+    const scrolled = window.scrollY > 60;
+    nav.classList.toggle('nav-scrolled', scrolled);
+    // Swap logo: oscuro sobre fondo blanco, claro sobre hero
+    const logo = document.getElementById('nav-logo-img');
+    if (logo) logo.src = scrolled ? 'logo-oscuro.png' : 'logo.svg';
   }
 }, { passive: true });
 
@@ -1326,7 +1329,7 @@ window.addEventListener('scroll', () => {
 <style>
 /* Botón flotante */
 .chat-fab {
-  position: fixed; bottom: 24px; right: 24px; z-index: 400;
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
   width: 58px; height: 58px; border-radius: 50%;
   background: #1a3a6b; color: #fff; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -1346,7 +1349,7 @@ window.addEventListener('scroll', () => {
 
 /* Panel del chat */
 .chat-panel {
-  position: fixed; bottom: 90px; right: 24px; z-index: 400;
+  position: fixed; bottom: 90px; right: 24px; z-index: 1000;
   width: 360px; max-width: calc(100vw - 32px);
   height: 480px; max-height: calc(100vh - 120px);
   background: var(--surface); border-radius: 16px;

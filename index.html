@@ -446,10 +446,12 @@ function handleRoute() {
       'Hacemos tu emprendimiento más fácil. Productos para carnicería, panadería, cocina industrial y más.',
       location.origin + location.pathname + '#/');
     document.getElementById('main-nav').className = 'nav nav-transparent';
+    document.getElementById('nav-logo-img').src = 'logo.svg';
     updateNavActive('home');
   } else if (path === '/catalogo' || path.startsWith('/catalogo')) {
     document.getElementById('view-catalogo').style.display = '';
     document.getElementById('main-nav').className = 'nav';
+    document.getElementById('nav-logo-img').src = 'logo-oscuro.png';
     updateNavActive('catalogo');
     renderCatalog();
     window.scrollTo(0,0);
@@ -460,12 +462,14 @@ function handleRoute() {
     const code = decodeURIComponent(path.replace('/producto/', ''));
     document.getElementById('view-producto').style.display = '';
     document.getElementById('main-nav').className = 'nav';
+    document.getElementById('nav-logo-img').src = 'logo-oscuro.png';
     updateNavActive('');
     loadProductDetail(code);
     window.scrollTo(0,0);
   } else if (path === '/quienes-somos') {
     document.getElementById('view-quienes').style.display = '';
     document.getElementById('main-nav').className = 'nav';
+    document.getElementById('nav-logo-img').src = 'logo-oscuro.png';
     updateNavActive('quienes');
     window.scrollTo(0,0);
     setSEO('Quiénes somos — Muñoz Marchesi',

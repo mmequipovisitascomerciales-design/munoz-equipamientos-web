@@ -1180,7 +1180,7 @@ input, select, textarea { font-family: inherit; }
    CHECKOUT MODAL
 ════════════════════════════════════════════════════════ */
 .checkout-overlay {
-  position: fixed; inset: 0; z-index: 400;
+  position: fixed; inset: 0; z-index: 500;
   background: rgba(0,0,0,.55);
   backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center;

@@ -1290,7 +1290,7 @@ function renderDestacados() {
   const toShow = destacadosCodigos
     .map(cod => allProducts.find(p => norm(p.codigo) === norm(cod)))
     .filter(Boolean)
-    .slice(0, 10);
+    .slice(0, 8);
   if (!toShow.length) { document.getElementById('destacados').style.display='none'; return; }
   document.getElementById('destacados').style.display = '';
   grid.innerHTML = toShow.map(p => renderProdCard(p)).join('');
